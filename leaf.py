@@ -68,7 +68,7 @@ def simulate(program):
 
 
 def compile(program):
-    with open(f"{sys.argv[0].split('.')[0]}.asm", "w") as f:
+    with open(f"{sys.argv[0].split('.')[1][1:]}.asm", "w") as f:
         f.write(
             """; AUTOGEN by LEAF.PY
 section .text
@@ -130,28 +130,28 @@ _start:
         for op in program:
             assert StkOperations.OP_COUNT.value == 5, "Some operation is unhandled"
             if op[0] == StkOperations.PUSH.name:
-                f.write(f"   push {op[1]}\n")
+                f.write(f"    push {op[1]}\n")
 
             elif op[0] == StkOperations.PLUS.name:
-                f.write(f"   pop rax\n")
-                f.write(f"   pop rbx\n")
+                f.write(f"    pop rax\n")
+                f.write(f"    pop rbx\n")
 
-                f.write(f"   add rbx, rax\n")
-                f.write(f"   push rbx\n")
+                f.write(f"    add rbx, rax\n")
+                f.write(f"    push rbx\n")
 
             elif op[0] == StkOperations.MINUS.name:
-                f.write(f"   pop rax\n")
-                f.write(f"   pop rbx\n")
+                f.write(f"    pop rax\n")
+                f.write(f"    pop rbx\n")
 
-                f.write(f"   sub rbx, rax\n")
-                f.write(f"   push rbx\n")
+                f.write(f"    sub rbx, rax\n")
+                f.write(f"    push rbx\n")
 
             elif op[0] == StkOperations.DUMP.name:
-                f.write(f"   pop rdi\n")
-                f.write(f"   call dump\n")
+                f.write(f"    pop rdi\n")
+                f.write(f"    call dump\n")
 
             else:
-                raise TypeError(f"Invalid Operation in program: {op}")
+                raise NotImplementedError(f"Invalid Operation in program: {op}")
 
         f.write("""
     mov rax, 60
@@ -176,6 +176,7 @@ prog = [
     push(500),
     push(80),
     minus(),
+
     dump(),
 ]
 

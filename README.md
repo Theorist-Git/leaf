@@ -3,11 +3,6 @@
 * Inspired by [PORTH](https://github.com/tsoding/porth)
 
 ## Build:
-
-* Building leaf.py script:
-  ```bash
-  $ ./build.sh
-  ```
   
 * Simulation:
   ```bash
