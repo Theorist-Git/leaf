@@ -10,6 +10,7 @@ class StkOperations(Enum):
     PUSH = auto()
     PLUS = auto()
     MINUS = auto()
+    EQUALITY = auto()
     DUMP = auto()
     OP_COUNT = auto()
 
@@ -32,37 +33,22 @@ def minus():
     return command
 
 
+def equality():
+    command: tuple = (StkOperations.EQUALITY.name,)
+
+    return command
+
+
 def dump():
     command: tuple = (StkOperations.DUMP.name,)
 
     return command
 
 
-def ret_op(op):
-    if op == "+":
-        return plus()
-    elif op == "-":
-        return minus()
-    elif op == "DUMP":
-        return dump()
-    elif op.isdigit():
-        return push(int(op))
-
-
-def load_program(file_path):
-    from pathlib import Path
-    file_path = Path(file_path)
-
-    if not file_path.name.endswith(".lf"):
-        raise ValueError("Expected a .lf file")
-    with open(file_path, "r") as f:
-        return [ret_op(op) for op in f.read().split()]
-
-
 def simulate(program):
     stk = []
     for op in program:
-        assert StkOperations.OP_COUNT.value == 5, "Some operation is unhandled"
+        assert StkOperations.OP_COUNT.value == 6, "Some operation is unhandled"
         if op[0] == StkOperations.PUSH.name:
             stk.append(op[1])
 
@@ -84,8 +70,39 @@ def simulate(program):
             out = stk.pop()
             print(out)
 
+        elif op[0] == StkOperations.EQUALITY.name:
+            val1 = stk.pop()
+            val2 = stk.pop()
+
+            stk.append(int(val1 == val2))
+
         else:
             raise TypeError("Invalid Operation Type")
+
+
+def ret_op(op):
+    if op == "+":
+        return plus()
+    elif op == "-":
+        return minus()
+    elif op == "DUMP":
+        return dump()
+    elif op == "==":
+        return equality()
+    elif op.isdigit():
+        return push(int(op))
+    else:
+        return None, op
+
+
+def load_program(file_path):
+    from pathlib import Path
+    file_path = Path(file_path)
+
+    if not file_path.name.endswith(".lf"):
+        raise ValueError("Expected a .lf file")
+    with open(file_path, "r") as f:
+        return [ret_op(op) for op in f.read().split()]
 
 
 def compile(program):
@@ -152,7 +169,7 @@ _start:
 """
         )
         for op in program:
-            assert StkOperations.OP_COUNT.value == 5, "Some operation is unhandled"
+            assert StkOperations.OP_COUNT.value == 6, "Some operation is unhandled"
             if op[0] == StkOperations.PUSH.name:
                 f.write(f"    push {op[1]}\n")
 
@@ -169,6 +186,15 @@ _start:
 
                 f.write(f"    sub rbx, rax\n")
                 f.write(f"    push rbx\n")
+
+            elif op[0] == StkOperations.EQUALITY.name:
+                f.write(f"    mov rcx, 0\n")
+                f.write(f"    mov rdx, 1\n")
+                f.write(f"    pop rax\n")
+                f.write(f"    pop rbx\n")
+                f.write(f"    cmp rax, rbx\n")
+                f.write(f"    cmove rcx, rdx\n")
+                f.write(f"    push rcx\n")
 
             elif op[0] == StkOperations.DUMP.name:
                 f.write(f"    pop rdi\n")
