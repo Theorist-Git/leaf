@@ -89,7 +89,10 @@ def simulate(program):
 
 
 def compile(program):
-    with open(f"{sys.argv[0].split('.')[1][1:]}.asm", "w") as f:
+    from pathlib import Path
+    f_name = Path(sys.argv[2]).stem
+
+    with open(f"{f_name}.asm", "w") as f:
         f.write(
             """; AUTOGEN by LEAF.PY
 section .text
@@ -180,7 +183,7 @@ _start:
     syscall
         """)
 
-    subprocess.call(["./build.sh"])
+    subprocess.call(["./build.sh", f"{f_name}"])
 
 
 def usage():

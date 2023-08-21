@@ -2,7 +2,7 @@
 
 set -xe
 
-nasm -f elf64 leaf.asm -o leaf.o
-ld  leaf.o -o leaf
-rm leaf.o
-./leaf
+nasm -f elf64 $1.asm -o $1.o
+ld  $1.o -o $1
+rm $1.o
+./$1
