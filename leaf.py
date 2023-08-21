@@ -38,6 +38,27 @@ def dump():
     return command
 
 
+def ret_op(op):
+    if op == "+":
+        return plus()
+    elif op == "-":
+        return minus()
+    elif op == "DUMP":
+        return dump()
+    elif op.isdigit():
+        return push(int(op))
+
+
+def load_program(file_path):
+    from pathlib import Path
+    file_path = Path(file_path)
+
+    if not file_path.name.endswith(".lf"):
+        raise ValueError("Expected a .lf file")
+    with open(file_path, "r") as f:
+        return [ret_op(op) for op in f.read().split()]
+
+
 def simulate(program):
     stk = []
     for op in program:
@@ -164,21 +185,9 @@ _start:
 
 def usage():
     print("USAGE: leaf.py <COMMAND> [ARGS]")
-    print("COMMANDS:\n\tsim : simulate the program stack.\n\tcom : compile the program")
+    print("COMMANDS:\n\t<sim> [file] : simulate the program stack.\n\t<com> [file] : compile the program")
     print("ERROR: No command specified")
 
-
-prog = [
-    push(34),
-    push(35),
-    plus(),
-    dump(),
-    push(500),
-    push(80),
-    minus(),
-
-    dump(),
-]
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
@@ -186,6 +195,10 @@ if __name__ == '__main__':
         exit(1)
 
     cmd = sys.argv[1]
+    file = sys.argv[2]
+
+    prog = load_program(file_path=file)
+    print(prog)
 
     if cmd == "sim":
         simulate(prog)

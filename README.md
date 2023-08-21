@@ -18,5 +18,7 @@
 // dump.c is compiled to intel asm and is used in compile() function.
 
 ### --TODO-- :
-Reduce Hard-coding of data and programs
+* Reduce Hard-coding of data and programs (DONE)
+* Better Error handling
+* Conditionals, loops
   
