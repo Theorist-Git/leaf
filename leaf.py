@@ -12,6 +12,7 @@ class StkOperations(Enum):
     MINUS = auto()
     EQUALITY = auto()
     IF = auto()
+    ELSE = auto()
     END = auto()
     DUMP = auto()
     OP_COUNT = auto()
@@ -43,6 +44,12 @@ def equality():
 
 def if_condition():
     command: tuple = (StkOperations.IF.name, )
+
+    return command
+
+
+def else_condition():
+    command: tuple = (StkOperations.ELSE.name, )
 
     return command
 
@@ -111,6 +118,8 @@ def ret_op(op):
         return equality()
     elif op == "if":
         return if_condition()
+    elif op == "else":
+        return else_condition()
     elif op == "end":
         return end()
     elif op.lstrip("-").isdigit():
@@ -126,10 +135,20 @@ def add_reference(program):
 
         if op[0] == StkOperations.IF.name:
             stk.append(i)
-        elif op[0] == StkOperations.END.name:
+
+        elif op[0] == StkOperations.ELSE.name:
             if_pos = stk.pop()
             assert program[if_pos][0] == StkOperations.IF.name
-            program[if_pos] = (StkOperations.IF.name, i)
+            program[if_pos] = (StkOperations.IF.name, i + 1)
+            stk.append(i)
+
+        elif op[0] == StkOperations.END.name:
+            block_pos = stk.pop()
+
+            if program[block_pos][0] == StkOperations.IF.name or program[block_pos][0] == StkOperations.ELSE.name:
+                program[block_pos] = (program[block_pos][0], i)
+            else:
+                assert False, "`end` works with if or else blocks only"
 
     return program
 
@@ -245,6 +264,12 @@ _start:
                 f.write(f"    test rax, rax\n")
 
                 f.write(f"    jz addr_{op[1]}\n")
+
+            elif op[0] == StkOperations.ELSE.name:
+                assert len(op) == 2, f"`if` Operation {op} doesn't provide reference to end block"
+
+                f.write(f"    jmp addr_{op[1]}\n")
+                f.write(f"addr_{i + 1}:\n")
 
             elif op[0] == StkOperations.END.name:
                 f.write(f"addr_{i}:\n")
